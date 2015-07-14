@@ -34,7 +34,7 @@ int read_padding(FILE* f, unsigned itemsize, int pagesize)
 
 void write_string_to_file(char* file, char* string)
 {
-    FILE* f = fopen(file, "w");
+    FILE* f = fopen(file, "a");
     fwrite(string, strlen(string), 1, f);
     fwrite("\n", 1, 1, f);
     fclose(f);
@@ -126,60 +126,60 @@ int main(int argc, char** argv)
     }
     
     //printf("cmdline...\n");
-    sprintf(tmp, "%s/%s", directory, basename(filename));
-    strcat(tmp, "-cmdline");
+    sprintf(tmp, "%s/cmdline", directory);
+    remove(tmp);
     write_string_to_file(tmp, (char *)header.cmdline);
     
-    //printf("base...\n");
-    sprintf(tmp, "%s/%s", directory, basename(filename));
-    strcat(tmp, "-base");
-    char basetmp[200];
-    sprintf(basetmp, "%08x", base);
-    write_string_to_file(tmp, basetmp);
+    sprintf(tmp, "%s/image_info", directory);
+    remove(tmp);
     
     //printf("pagesize...\n");
-    sprintf(tmp, "%s/%s", directory, basename(filename));
-    strcat(tmp, "-pagesize");
     char pagesizetmp[200];
-    sprintf(pagesizetmp, "%d", header.page_size);
+    sprintf(pagesizetmp, "page_size=%d", header.page_size);
     write_string_to_file(tmp, pagesizetmp);
     
+    //printf("base...\n");
+    char basetmp[200];
+    sprintf(basetmp, "base_addr=0x%08x", base);
+    write_string_to_file(tmp, basetmp);
+    
     //printf("kerneloff...\n");
-    sprintf(tmp, "%s/%s", directory, basename(filename));
-    strcat(tmp, "-kerneloff");
     char kernelofftmp[200];
-    sprintf(kernelofftmp, "%08x", header.kernel_addr - base);
+    sprintf(kernelofftmp, "kernel_offset=0x%08x", header.kernel_addr - base);
     write_string_to_file(tmp, kernelofftmp);
+
+    //printf("kernelsize...\n");
+    char kernelsizetmp[200];
+    sprintf(kernelsizetmp, "kernel_size=%d", header.kernel_size);
+    write_string_to_file(tmp, kernelsizetmp);
     
     //printf("ramdiskoff...\n");
-    sprintf(tmp, "%s/%s", directory, basename(filename));
-    strcat(tmp, "-ramdiskoff");
     char ramdiskofftmp[200];
-    sprintf(ramdiskofftmp, "%08x", header.ramdisk_addr - base);
+    sprintf(ramdiskofftmp, "ramdisk_offset=0x%08x", header.ramdisk_addr - base);
     write_string_to_file(tmp, ramdiskofftmp);
+    
+    //printf("ramdisksize...\n");
+    char ramdisksizetmp[200];
+    sprintf(ramdisksizetmp, "ramdisk_size=%d", header.ramdisk_size);
+    write_string_to_file(tmp, ramdisksizetmp);
     
     if (header.second_size != 0) {
         //printf("secondoff...\n");
-        sprintf(tmp, "%s/%s", directory, basename(filename));
-        strcat(tmp, "-secondoff");
         char secondofftmp[200];
-        sprintf(secondofftmp, "%08x", header.second_addr - base);
+        sprintf(secondofftmp, "second_offset=0x%08x", header.second_addr - base);
         write_string_to_file(tmp, secondofftmp);
+
+        //printf("secondsize...\n");
+        char secondsizetmp[200];
+        sprintf(secondsizetmp, "second_size=%d", header.second_size);
+        write_string_to_file(tmp, secondsizetmp);
     }
-    
-    //printf("tagsoff...\n");
-    sprintf(tmp, "%s/%s", directory, basename(filename));
-    strcat(tmp, "-tagsoff");
-    char tagsofftmp[200];
-    sprintf(tagsofftmp, "%08x", header.tags_addr - base);
-    write_string_to_file(tmp, tagsofftmp);
     
     total_read += sizeof(header);
     //printf("total read: %d\n", total_read);
     total_read += read_padding(f, sizeof(header), pagesize);
     
-    sprintf(tmp, "%s/%s", directory, basename(filename));
-    strcat(tmp, "-zImage");
+    sprintf(tmp, "%s/zImage", directory);
     FILE *k = fopen(tmp, "wb");
     byte* kernel = (byte*)malloc(header.kernel_size);
     //printf("Reading kernel...\n");
@@ -191,8 +191,7 @@ int main(int argc, char** argv)
     //printf("total read: %d\n", header.kernel_size);
     total_read += read_padding(f, header.kernel_size, pagesize);
     
-    sprintf(tmp, "%s/%s", directory, basename(filename));
-    strcat(tmp, "-ramdisk.gz");
+    sprintf(tmp, "%s/ramdisk.cpio.gz", directory);
     FILE *r = fopen(tmp, "wb");
     byte* ramdisk = (byte*)malloc(header.ramdisk_size);
     //printf("Reading ramdisk...\n");
@@ -205,8 +204,7 @@ int main(int argc, char** argv)
     total_read += read_padding(f, header.ramdisk_size, pagesize);
     
     if (header.second_size != 0) {
-        sprintf(tmp, "%s/%s", directory, basename(filename));
-        strcat(tmp, "-second");
+        sprintf(tmp, "%s/second.bin", directory);
         FILE *s = fopen(tmp, "wb");
         byte* second = (byte*)malloc(header.second_size);
         //printf("Reading second...\n");
@@ -219,8 +217,7 @@ int main(int argc, char** argv)
     //printf("total read: %d\n", header.second_size);
     total_read += read_padding(f, header.second_size, pagesize);
 
-    sprintf(tmp, "%s/%s", directory, basename(filename));
-    strcat(tmp, "-signature");
+    sprintf(tmp, "%s/signature", directory);
     FILE *fsig = fopen(tmp, "wb");
     byte* bsig = (byte*)malloc(728);
     //printf("Reading signature...\n");
