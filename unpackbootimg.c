@@ -100,17 +100,20 @@ int main(int argc, char** argv)
     
     fread(&header, sizeof(header), 1, f);
     base = header.kernel_addr - 0x00008000;
-    printf("BOARD_KERNEL_CMDLINE %s\n", header.cmdline);
-    printf("BOARD_KERNEL_BASE %08x\n", base);
+    
+    printf("  %-15s : %d\n", "page_size", header.page_size);
+    printf("  %-15s : 0x%08x\n", "base_addr", base);
     //printf("BOARD_NAME %s\n", header.name);
-    printf("BOARD_PAGE_SIZE %d\n", header.page_size);
-    printf("BOARD_KERNEL_OFFSET %08x\n", header.kernel_addr - base);
-    printf("BOARD_RAMDISK_OFFSET %08x\n", header.ramdisk_addr - base);
+    printf("  %-15s : 0x%08x\n", "kernel_offset", header.kernel_addr - base);
+    printf("  %-15s : %d\n", "kernel_size", header.kernel_size);
+    printf("  %-15s : 0x%08x\n", "ramdisk_offset", header.ramdisk_addr - base);
+    printf("  %-15s : %d\n", "ramdisk_size", header.ramdisk_size);
     if (header.second_size != 0) {
-        printf("BOARD_SECOND_SIZE %d\n", header.second_size);
-        printf("BOARD_SECOND_OFFSET %08x\n", header.second_addr - base);
+        printf("  %-15s : 0x%08x\n", "second_offset", header.second_addr - base);
+        printf("  %-15s : %d\n", "second_size", header.second_size);
     }
-    printf("BOARD_TAGS_OFFSET %08x\n", header.tags_addr - base);
+    //printf("BOARD_TAGS_OFFSET %08x\n", header.tags_addr - base);
+    printf("  %-15s : %s\n", "cmdline", header.cmdline);
     
     if (pagesize == 0) {
         pagesize = header.page_size;
