@@ -20,4 +20,9 @@ if [ -d boot/ramdisk ]; then
   cd ..
 fi
 
-./mkbootimg --kernel boot/zImage --ramdisk boot/ramdisk.cpio.gz --second boot/second.bin --cmdline "$(cat boot/cmdline)" -o boot.img
+CMDLINE="$(cat boot/cmdline)"
+if [[ "$CMDLINE" != *"androidboot.selinux=permissive"* ]]; then
+  CMDLINE="$CMDLINE androidboot.selinux=permissive"
+fi
+
+./mkbootimg --kernel boot/zImage --ramdisk boot/ramdisk.cpio.gz --second boot/second.bin --cmdline "$CMDLINE" -o boot.img
