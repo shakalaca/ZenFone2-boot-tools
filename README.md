@@ -12,10 +12,10 @@ $ unpackbootimg -i boot.img
 
 ### pack boot.img or recovery.img
 ```
-$ mkbootimg --kernel boot.img-zImage \
-            --ramdisk boot.img-ramdisk.gz \
-            --cmdline "$(cat boot.img-cmdline)" \
-            --second boot.img-second \
-            --signature boot.img-signature \
+$ mkbootimg --kernel zImage \
+            --ramdisk ramdisk.cpio.gz \
+            --cmdline "$(cat cmdline)" \
+            --second second.bin \
+            --signature signature \
             -o boot.img
 ```
